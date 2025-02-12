@@ -1,3 +1,4 @@
+import { HalfFloatType, UnsignedByteType } from '../../../constants.js';
 import { GPUPrimitiveTopology, GPUTextureFormat } from './WebGPUConstants.js';
 
 /**
@@ -27,7 +28,7 @@ class WebGPUUtils {
 	 * Returns the depth/stencil GPU format for the given render context.
 	 *
 	 * @param {RenderContext} renderContext - The render context.
-	 * @return {String} The depth/stencil GPU texture format.
+	 * @return {string} The depth/stencil GPU texture format.
 	 */
 	getCurrentDepthStencilFormat( renderContext ) {
 
@@ -55,7 +56,7 @@ class WebGPUUtils {
 	 * Returns the GPU format for the given texture.
 	 *
 	 * @param {Texture} texture - The texture.
-	 * @return {String} The GPU texture format.
+	 * @return {string} The GPU texture format.
 	 */
 	getTextureFormatGPU( texture ) {
 
@@ -103,7 +104,7 @@ class WebGPUUtils {
 	 * Returns the default color attachment's GPU format of the current render context.
 	 *
 	 * @param {RenderContext} renderContext - The render context.
-	 * @return {String} The GPU texture format of the default color attachment.
+	 * @return {string} The GPU texture format of the default color attachment.
 	 */
 	getCurrentColorFormat( renderContext ) {
 
@@ -127,7 +128,7 @@ class WebGPUUtils {
 	 * Returns the output color space of the current render context.
 	 *
 	 * @param {RenderContext} renderContext - The render context.
-	 * @return {String} The output color space.
+	 * @return {string} The output color space.
 	 */
 	getCurrentColorSpace( renderContext ) {
 
@@ -146,7 +147,7 @@ class WebGPUUtils {
 	 *
 	 * @param {Object3D} object - The 3D object.
 	 * @param {Material} material - The material.
-	 * @return {String} The GPU primitive topology.
+	 * @return {string} The GPU primitive topology.
 	 */
 	getPrimitiveTopology( object, material ) {
 
@@ -162,8 +163,8 @@ class WebGPUUtils {
 	 *
 	 * That is required since WebGPU does not support arbitrary sample counts.
 	 *
-	 * @param {Number} sampleCount - The input sample count.
-	 * @return {Number} The (potentially updated) output sample count.
+	 * @param {number} sampleCount - The input sample count.
+	 * @return {number} The (potentially updated) output sample count.
 	 */
 	getSampleCount( sampleCount ) {
 
@@ -190,7 +191,7 @@ class WebGPUUtils {
 	 * Returns the sample count of the given render context.
 	 *
 	 * @param {RenderContext} renderContext - The render context.
-	 * @return {Number} The sample count.
+	 * @return {number} The sample count.
 	 */
 	getSampleCountRenderContext( renderContext ) {
 
@@ -210,20 +211,27 @@ class WebGPUUtils {
 	 * There is a separate method for this so it's possible to
 	 * honor edge cases for specific devices.
 	 *
-	 * @return {String} The GPU texture format of the canvas.
+	 * @return {string} The GPU texture format of the canvas.
 	 */
 	getPreferredCanvasFormat() {
 
-		// TODO: Remove this check when Quest 34.5 is out
-		// https://github.com/mrdoob/three.js/pull/29221/files#r1731833949
+		const outputType = this.backend.parameters.outputType;
 
-		if ( navigator.userAgent.includes( 'Quest' ) ) {
+		if ( outputType === undefined ) {
+
+			return navigator.gpu.getPreferredCanvasFormat();
+
+		} else if ( outputType === UnsignedByteType ) {
 
 			return GPUTextureFormat.BGRA8Unorm;
 
+		} else if ( outputType === HalfFloatType ) {
+
+			return GPUTextureFormat.RGBA16Float;
+
 		} else {
 
-			return navigator.gpu.getPreferredCanvasFormat();
+			throw new Error( 'Unsupported outputType' );
 
 		}
 

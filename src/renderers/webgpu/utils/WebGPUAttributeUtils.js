@@ -69,16 +69,27 @@ class WebGPUAttributeUtils {
 			let array = bufferAttribute.array;
 
 			// patch for INT16 and UINT16
-			if ( attribute.normalized === false && ( array.constructor === Int16Array || array.constructor === Uint16Array ) ) {
+			if ( attribute.normalized === false ) {
 
-				const tempArray = new Uint32Array( array.length );
-				for ( let i = 0; i < array.length; i ++ ) {
+				if ( array.constructor === Int16Array ) {
 
-					tempArray[ i ] = array[ i ];
+					array = new Int32Array( array );
+
+				} else if ( array.constructor === Uint16Array ) {
+
+					array = new Uint32Array( array );
+
+					if ( usage & GPUBufferUsage.INDEX ) {
+
+						for ( let i = 0; i < array.length; i ++ ) {
+
+							if ( array[ i ] === 0xffff ) array[ i ] = 0xffffffff; // use correct primitive restart index
+
+						}
+
+					}
 
 				}
-
-				array = tempArray;
 
 			}
 
@@ -314,7 +325,7 @@ class WebGPUAttributeUtils {
 	 *
 	 * @private
 	 * @param {BufferAttribute} geometryAttribute - The buffer attribute.
-	 * @return {String} The vertex format (e.g. 'float32x3').
+	 * @return {string} The vertex format (e.g. 'float32x3').
 	 */
 	_getVertexFormat( geometryAttribute ) {
 
@@ -365,8 +376,8 @@ class WebGPUAttributeUtils {
 	 * Returns `true` if the given array is a typed array.
 	 *
 	 * @private
-	 * @param {Any} array - The array.
-	 * @return {Boolean} Whether the given array is a typed array or not.
+	 * @param {any} array - The array.
+	 * @return {boolean} Whether the given array is a typed array or not.
 	 */
 	_isTypedArray( array ) {
 

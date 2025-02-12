@@ -41,7 +41,8 @@
     "CodeMirror": "readonly",
     "esprima": "readonly",
     "jsonlint": "readonly",
-    "VideoFrame": "readonly"
+    "VideoFrame": "readonly",
+    "VideoDecoder": "readonly"
   },
   "rules": {
     "no-throw-literal": [
@@ -71,7 +72,14 @@
         "requireReturnType": true,
         "requireParamDescription": false,
         "requireReturnDescription": false,
-        "requireParamType": true
+        "requireParamType": true,
+        "preferType": {
+          "Any": "any",
+          "Boolean": "boolean",
+          "Number": "number",
+          "object": "Object",
+          "String": "string"
+        }
       }
     ]
   }
